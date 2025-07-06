@@ -34,8 +34,10 @@ app.post("/api/chat", async (req, res) => {
     const data = await response.json();
 
     const reply =
-      data?.choices?.[0]?.message?.content?.trim() ||
-      "⚠️ AI did not return a usable message.";
+  data?.choices?.[0]?.message?.content?.trim() ||
+  data?.choices?.[0]?.delta?.content?.trim() ||
+  data?.choices?.[0]?.text?.trim() ||
+  "⚠️ AI did not return a usable message.";
 
     res.json({ reply });
 
