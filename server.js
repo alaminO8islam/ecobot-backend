@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 const SYSTEM_PROMPT = `
-You are EcoBot, an ethical assistant for a sustainability dashboard. Help users track carbon emissions, vitamin D from sunlight, UV index, and give daily eco tips. Always be polite and helpful.
+You are EcoBot, a helpful, ethical assistant for a sustainability dashboard. You guide users on carbon footprint, UV index, vitamin D from sunlight, and eco-friendly habits. Respond warmly, clearly, and concisely.
 `;
 
 app.post("/api/chat", async (req, res) => {
@@ -32,17 +32,18 @@ app.post("/api/chat", async (req, res) => {
 
     const data = await response.json();
 
-    if (!data.choices || !data.choices[0]) {
-      return res.status(500).json({ reply: "❌ Invalid response from OpenRouter." });
-    }
+    const reply =
+      data?.choices?.[0]?.message?.content ||
+      data?.choices?.[0]?.delta?.content ||
+      "⚠️ AI did not return a message.";
 
-    res.json({ reply: data.choices[0].message.content });
+    res.json({ reply });
   } catch (error) {
-    console.error("Backend Error:", error);
+    console.error("❌ Backend Error:", error.message);
     res.status(500).json({ reply: "⚠️ Server error. Please try again later." });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`✅ EcoBot backend is running on http://localhost:${PORT}`);
+  console.log(`✅ EcoBot backend running at http://localhost:${PORT}`);
 });
