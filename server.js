@@ -21,19 +21,19 @@ app.post("/api/chat", async (req, res) => {
 
   try {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer YOUR_OPENROUTER_API_KEY`, // 🔁 REPLACE THIS
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "mistralai/mixtral-8x7b", // ✅ Free & capable model
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          ...messages
-        ]
-      })
-    });
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    model: "mistralai/mixtral-8x7b",
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      ...messages
+    ]
+  })
+});
 
     const data = await response.json();
     const reply = data?.choices?.[0]?.message?.content || "Sorry, I couldn't understand that.";
