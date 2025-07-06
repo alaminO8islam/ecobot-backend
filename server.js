@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 const SYSTEM_PROMPT = `
-You are EcoBot, a helpful, ethical assistant for a sustainability dashboard. You guide users on carbon footprint, UV index, vitamin D from sunlight, and eco-friendly habits. Respond warmly, clearly, and concisely.
+You are EcoBot, a helpful, ethical assistant for a sustainability dashboard. Help users understand carbon emissions, vitamin D from sunlight, UV index, and provide eco-friendly suggestions. Keep your answers simple, warm, and factual.
 `;
 
 app.post("/api/chat", async (req, res) => {
@@ -22,25 +22,28 @@ app.post("/api/chat", async (req, res) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-         model: "openai/gpt-3.5-turbo",
+        model: "openai/gpt-3.5-turbo", // ✅ use stable model
+        stream: false,                 // ✅ ensures full response in .message.content
         messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        ...messages
-     ]
-    })
-
+          { role: "system", content: SYSTEM_PROMPT },
+          ...messages
+        ]
+      })
     });
 
     const data = await response.json();
 
-    const reply =
-      data?.choices?.[0]?.message?.content ||
-      data?.choices?.[0]?.delta?.content ||
-      "⚠️ AI did not return a message.";
+    // ✅ Safe fallback if message is empty
+    const reply = data?.choices?.[0]?.message?.content?.trim();
+
+    if (!reply) {
+      console.error("OpenRouter returned empty content:", JSON.stringify(data));
+      return res.status(500).json({ reply: "⚠️ AI did not return a usable message." });
+    }
 
     res.json({ reply });
   } catch (error) {
-    console.error("❌ Backend Error:", error.message);
+    console.error("SERVER ERROR:", error.message);
     res.status(500).json({ reply: "⚠️ Server error. Please try again later." });
   }
 });
