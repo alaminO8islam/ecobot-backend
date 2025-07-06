@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 const SYSTEM_PROMPT = `
-You are EcoBot, a friendly and ethical AI that helps users track carbon footprint, vitamin D from sunlight, UV index, and health behaviors. Answer simply, accurately, and helpfully.
+You are EcoBot, an ethical assistant for a sustainability dashboard. You help users reduce carbon emissions, track vitamin D from sunlight, and suggest eco-friendly lifestyle tips. Be concise, positive, and helpful.
 `;
 
 app.post("/api/chat", async (req, res) => {
@@ -22,8 +22,8 @@ app.post("/api/chat", async (req, res) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "openai/gpt-3.5-turbo", // ✅ using stable model
-        stream: false,                // ✅ ensures structured reply
+        model: "openchat/openchat-3.5-0106",  // ✅ stable model
+        stream: false,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           ...messages
@@ -34,15 +34,14 @@ app.post("/api/chat", async (req, res) => {
     const data = await response.json();
 
     const reply =
-  data?.choices?.[0]?.message?.content?.trim() ||
-  data?.choices?.[0]?.delta?.content?.trim() ||
-  data?.choices?.[0]?.text?.trim() ||
-  "⚠️ AI did not return a usable message.";
+      data?.choices?.[0]?.message?.content?.trim() ||
+      data?.choices?.[0]?.delta?.content?.trim() ||
+      data?.choices?.[0]?.text?.trim() ||
+      "⚠️ AI did not return a usable message.";
 
     res.json({ reply });
-
   } catch (error) {
-    console.error("❌ Backend error:", error.message);
+    console.error("❌ Backend Error:", error.message);
     res.status(500).json({ reply: "⚠️ Server error. Please try again later." });
   }
 });
